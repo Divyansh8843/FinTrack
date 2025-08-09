@@ -164,20 +164,20 @@ export default function AddExpensePage() {
             Add Expense
           </h1>
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <label className="block font-medium">Amount</label>
               <input
                 type="number"
-                className="border rounded p-2 flex-1"
+                className="border rounded p-2 w-full sm:flex-1"
                 placeholder="Enter amount"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
               />
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <label className="block font-medium">Category</label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
                   <button
                     type="button"
@@ -195,31 +195,31 @@ export default function AddExpensePage() {
                 ))}
               </div>
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <label className="block font-medium">Description</label>
               <input
                 type="text"
-                className="border rounded p-2 flex-1"
+                className="border rounded p-2 w-full sm:flex-1"
                 placeholder="e.g. Lunch with friends"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <label className="block font-medium">Date</label>
               <input
                 type="date"
-                className="border rounded p-2 flex-1"
+                className="border rounded p-2 w-full sm:flex-1"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
               />
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <label className="block font-medium">Source</label>
               <input
                 type="text"
-                className="border rounded p-2 flex-1"
+                className="border rounded p-2 w-full sm:flex-1"
                 placeholder="cash, UPI, card, etc."
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
@@ -227,12 +227,12 @@ export default function AddExpensePage() {
             </div>
             <div className="flex flex-col gap-2">
               <label className="block font-medium">Upload Bill (OCR)</label>
-              <div className="flex gap-2 items-center">
+              <div className="flex flex-wrap gap-2 items-center">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImage(e.target.files?.[0] || null)}
-                  className="border rounded p-2 flex-1"
+                  className="border rounded p-2 w-full sm:flex-1"
                 />
                 <button
                   type="button"

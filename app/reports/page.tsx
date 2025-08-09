@@ -24,7 +24,7 @@ import {
   ExpenseAreaChart,
 } from "@/components/ExpensePieChart";
 import { jsPDF } from "jspdf";
-import Image from "next/image";
+import ProductionImage from "@/components/ProductionImage";
 import Papa from "papaparse";
 import { Download } from "lucide-react";
 export default function ReportsPage() {
@@ -801,7 +801,7 @@ export default function ReportsPage() {
     <main className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-indigo-100 to-blue-200 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-0">
       <div className="w-full max-w-screen-2xl mx-auto px-0 md:px-4 py-8">
         <h1 className="text-4xl flex items-center justify-center gap-2 md:text-5xl font-extrabold mb-4 text-indigo-700 dark:text-indigo-300 tracking-tight  animate-fade-in">
-          <Image
+          <ProductionImage
             className="text-blue-600 h-12 w-12"
             src="/report.png"
             alt="Reports"
@@ -1022,9 +1022,11 @@ export default function ReportsPage() {
                       {topCategories.map((cat) => (
                         <li
                           key={cat.name}
-                          className="flex justify-between text-base"
+                          className="flex justify-between text-base gap-4"
                         >
-                          <span>{cat.name}</span>
+                          <span className="break-words max-w-[60%]">
+                            {cat.name}
+                          </span>
                           <span className="font-bold">₹{cat.value}</span>
                         </li>
                       ))}
@@ -1044,9 +1046,11 @@ export default function ReportsPage() {
                       {topMerchants.map((m) => (
                         <li
                           key={m.name}
-                          className="flex justify-between text-base"
+                          className="flex justify-between text-base gap-4"
                         >
-                          <span>{m.name}</span>
+                          <span className="break-words max-w-[60%]">
+                            {m.name}
+                          </span>
                           <span className="font-bold">₹{m.value}</span>
                         </li>
                       ))}
@@ -1066,9 +1070,11 @@ export default function ReportsPage() {
                       {topSources.map((s) => (
                         <li
                           key={s.name}
-                          className="flex justify-between text-base"
+                          className="flex justify-between text-base gap-4"
                         >
-                          <span>{s.name}</span>
+                          <span className="break-words max-w-[60%]">
+                            {s.name}
+                          </span>
                           <span className="font-bold">₹{s.value}</span>
                         </li>
                       ))}

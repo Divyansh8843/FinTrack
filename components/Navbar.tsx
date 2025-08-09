@@ -4,6 +4,7 @@ import React from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import NotificationBell from "@/components/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useEffect } from "react";
 import {
   LogOut,
   LogIn,
@@ -17,27 +18,58 @@ import {
   FileText,
   UserCircle,
   Lightbulb,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import ProductionImage from "@/components/ProductionImage";
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [open, setOpen] = React.useState(false);
+  const [canInstall, setCanInstall] = React.useState<null | any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setCanInstall(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  // While session is loading, render a stable skeleton to prevent hydration mismatch
+  if (status === "loading") {
+    return (
+      <nav className="w-full flex items-center justify-between p-4 bg-background text-foreground shadow-sm sticky top-0 z-50 border-b">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
+          <div className="h-5 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+        </div>
+        <div className="hidden md:flex gap-4 items-center">
+          <div className="h-4 w-14 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+          <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+          <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 bg-zinc-200 dark:bg-zinc-800 rounded-full animate-pulse" />
+          <div className="h-8 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+        </div>
+      </nav>
+    );
+  }
+
   return (
-    <nav className="w-full flex items-center justify-between p-4 bg-white dark:bg-zinc-900 shadow-sm sticky top-0 z-50">
+    <nav className="w-full flex items-center justify-between p-4 bg-background text-foreground shadow-sm sticky top-0 z-50 border-b overflow-x-hidden">
       <div className="flex items-center gap-2">
         <Link href="/" className="flex items-center gap-1">
-          <Image
+          <ProductionImage
             src="/logo.png"
             alt="FinTrack Logo"
             width={36}
             height={36}
             className="rounded-full"
           />
-          <span className="font-bold text-xl text-indigo-700 dark:text-indigo-300 tracking-tight">
-            FinTrack
-          </span>
+          <span className="font-bold text-xl tracking-tight">FinTrack</span>
         </Link>
       </div>
       {/* Desktop nav */}
@@ -59,6 +91,12 @@ export default function Navbar() {
           className="flex items-center gap-1 hover:text-indigo-600"
         >
           Add Expense
+        </Link>
+        <Link
+          href="/budget"
+          className="flex items-center gap-1 hover:text-indigo-600"
+        >
+          Budget
         </Link>
         <Link
           href="/goals"
@@ -92,7 +130,7 @@ export default function Navbar() {
         </Link>
       </div>
       {/* Right side controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* Mobile menu button */}
         <button
           className="md:hidden p-2 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800"
@@ -101,12 +139,24 @@ export default function Navbar() {
         >
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
+        {canInstall && (
+          <button
+            onClick={async () => {
+              canInstall.prompt();
+              const { outcome } = await canInstall.userChoice;
+              setCanInstall(null);
+            }}
+            className="hidden md:inline-flex items-center gap-1 px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"
+          >
+            Install
+          </button>
+        )}
         <ThemeToggle />
         <NotificationBell />
         {session && (
           <Link href="/profile" className="hidden md:block">
             {session.user?.image ? (
-              <Image
+              <ProductionImage
                 src={session.user.image}
                 alt={session.user.name || "Profile"}
                 width={34}
@@ -146,15 +196,15 @@ export default function Navbar() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 md:hidden bg-white dark:bg-zinc-900 flex flex-col"
+          className="fixed inset-0 z-50 md:hidden bg-background text-foreground flex flex-col overflow-x-hidden"
         >
-          <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center justify-between p-4 border-b">
             <Link
               href="/"
               className="flex items-center gap-2"
               onClick={() => setOpen(false)}
             >
-              <Image
+              <ProductionImage
                 src="/logo.png"
                 alt="FinTrack Logo"
                 width={28}
@@ -194,6 +244,13 @@ export default function Navbar() {
               <PlusCircle className="w-5 h-5" /> Add Expense
             </Link>
             <Link
+              href="/budget"
+              className="inline-flex items-center gap-3 px-4 py-3 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full max-w-xs justify-center"
+              onClick={() => setOpen(false)}
+            >
+              <Wallet className="w-5 h-5" /> Budget
+            </Link>
+            <Link
               href="/goals"
               className="inline-flex items-center gap-3 px-4 py-3 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full max-w-xs justify-center"
               onClick={() => setOpen(false)}
@@ -229,7 +286,7 @@ export default function Navbar() {
               <UserCircle className="w-5 h-5" /> Profile
             </Link>
           </nav>
-          <div className="border-t border-zinc-200 dark:border-zinc-800 p-4">
+          <div className="border-t p-4">
             {session ? (
               <button
                 onClick={() => {

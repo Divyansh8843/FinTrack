@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
+import ProductionImage from "@/components/ProductionImage";
 import { Button } from "@/components/ui/button";
 import {
   BarChart2,
@@ -86,54 +86,35 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3,
-    },
+    transition: { staggerChildren: 0.1, delayChildren: 0.3 },
   },
 };
 
 const cardVariants = {
-  hidden: {
-    opacity: 0,
-    y: 50,
-    scale: 0.9,
-  },
+  hidden: { opacity: 0, y: 50, scale: 0.9 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 15,
-    },
+    transition: { type: "spring" as const, stiffness: 100, damping: 15 },
   },
   hover: {
     y: -10,
     scale: 1.05,
-    transition: {
-      type: "spring" as const,
-      stiffness: 300,
-      damping: 20,
-    },
+    transition: { type: "spring" as const, stiffness: 300, damping: 20 },
   },
 };
 
 const floatingVariants = {
   animate: {
     y: [-10, 10, -10],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: "easeInOut" as const,
-    },
+    transition: { duration: 3, repeat: Infinity, ease: "easeInOut" as const },
   },
 };
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const handleGoogleSignIn = () => {
     signIn("google", { callbackUrl: "/dashboard" });
@@ -142,7 +123,7 @@ export default function Home() {
   return (
     <div className="font-sans w-full min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900">
       {/* Hero Section */}
-      <section className="w-full h-[calc(100dvh-64px)] md:h-[calc(100vh-64px)] flex flex-col items-center justify-center py-6 md:py-10 px-4 text-center relative overflow-hidden bg-[url('/hero.png')] bg-no-repeat bg-cover bg-center">
+      <section className="w-full h-[calc(100dvh-64px)] md:h-[calc(100vh-64px)] flex flex-col items-center justify-center py-6 md:py-10 px-4 text-center relative overflow-hidden mb-4 bg-hero max-w-screen overflow-x-hidden">
         <div className="absolute inset-0 bg-black/30 dark:bg-black/85 backdrop-blur-[1px] pointer-events-none" />
         <div className="absolute inset-0 pointer-events-none dark:hidden bg-gradient-to-b from-white/30 via-transparent to-white/30" />
         <div className="relative z-10 mt-0">
@@ -154,7 +135,7 @@ export default function Home() {
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <span className="inline-flex rounded ">
-                <Image
+                <ProductionImage
                   src="/logo.png"
                   alt="FinTrack Logo"
                   width={90}
@@ -167,21 +148,26 @@ export default function Home() {
             </motion.h1>
 
             <motion.p
-              className="text-base sm:text-lg md:text-xl text-zinc-700 dark:text-zinc-200 max-w-xl sm:max-w-2xl md:max-w-3xl mx-auto mb-6 sm:mb-8 md:mb-10 leading-relaxed"
-              initial={{ opacity: 0, y: 30 }}
+              className="text-base sm:text-lg md:text-xl text-zinc-700 dark:text-zinc-300 max-w-2xl mx-auto mb-4 sm:mb-6"
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              transition={{ duration: 0.6, delay: 0.1 }}
             >
-              The smartest, AI-powered expense manager for students. Track,
-              analyze, and save smarter—on any device.
+              Track your spending, set goals, and get AI-powered insights to
+              save smarter—simple and fast.
             </motion.p>
 
-            {session ? (
+            {/* Gate session-dependent UI to avoid hydration mismatch */}
+            {status === "loading" ? (
+              <div className="h-12 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600" />
+              </div>
+            ) : session ? (
               <motion.div
                 className="space-y-4 sm:space-y-6"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
               >
                 <motion.p
                   className="text-lg sm:text-lg text-blue-600 dark:text-blue-400 font-medium flex items-center justify-center gap-2"
@@ -198,7 +184,12 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Button className="text-base sm:text-lg px-6 py-4 sm:px-8 sm:py-5 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-700 text-white font-bold shadow-xl">
+                    <Button
+                      className="text-base sm:text-lg px-6 py-4 sm:px-8 sm:py-5 bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-700 
+                    text-white font-bold
+                    mt-2
+                     shadow-xl"
+                    >
                       Go to Dashboard
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
@@ -209,7 +200,7 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -238,7 +229,7 @@ export default function Home() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl font-bold mb-4 pb-2 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+          <h2 className="text-5xl font-bold  pb-2 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
             Amazing Features
           </h2>
           <p className="text-xl text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto">
@@ -331,10 +322,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 100, scale: 0.8 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              animate={{
-                x: [0, 40, 0, -40, 0],
-                y: [0, -40, 0, 40, 0],
-              }}
+              animate={{ x: [0, 40, 0, -40, 0], y: [0, -40, 0, 40, 0] }}
               transition={{
                 duration: 8,
                 repeat: Infinity,
@@ -401,7 +389,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="w-full max-w-4xl mx-auto py-20 px-4">
+      <section className="w-full max-w-4xl mx-auto py-10 px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -487,7 +475,7 @@ export default function Home() {
           <h2 className="text-5xl font-bold text-white mb-6">
             Ready to take control of your finances?
           </h2>
-          {session ? (
+          {status === "loading" ? null : session ? (
             <Link href="/">
               <motion.div
                 whileHover={{ scale: 1.05 }}

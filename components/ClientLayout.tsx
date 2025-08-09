@@ -1,10 +1,12 @@
-'use client';
+"use client";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import ToastProvider from "@/components/ToastProvider";
+import Loader from "@/components/Loader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import GoToTop from "@/components/GoToTop";
 
 // Protected route wrapper component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -13,17 +15,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // List of public routes that don't require authentication
-  const publicRoutes = ['/', '/api/auth/signin', '/api/auth/signout'];
+  const publicRoutes = ["/", "/api/auth/signin", "/api/auth/signout"];
 
   useEffect(() => {
     // If not loading and not authenticated, redirect to home page
-    if (status === 'unauthenticated' && !publicRoutes.includes(pathname)) {
-      router.push('/');
+    if (status === "unauthenticated" && !publicRoutes.includes(pathname)) {
+      router.push("/");
     }
   }, [session, status, router, pathname]);
 
   // Show loading while checking authentication
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-zinc-900 dark:to-zinc-800">
         <div className="text-center">
@@ -35,7 +37,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   // If not authenticated and trying to access protected route, don't render anything
-  if (status === 'unauthenticated' && !publicRoutes.includes(pathname)) {
+  if (status === "unauthenticated" && !publicRoutes.includes(pathname)) {
     return null;
   }
 
@@ -43,21 +45,22 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar />
-      <main className="flex-1 w-full max-w-screen mx-auto">
-        {children}
-      </main>
+      <main className="flex-1 w-full max-w-screen mx-auto">{children}</main>
       <Footer />
+      <GoToTop />
     </>
   );
 }
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <SessionProvider>
       <ToastProvider />
-      <ProtectedRoute>
-        {children}
-      </ProtectedRoute>
+      <ProtectedRoute>{children}</ProtectedRoute>
     </SessionProvider>
   );
 }

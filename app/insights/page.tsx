@@ -34,7 +34,7 @@ export default function InsightsPage() {
 
   return (
     <main className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-blue-100 to-indigo-200 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-4">
-      <div className="py-2 px-2 md:px-0 max-w-3xl mx-auto w-full">
+      <div className="py-2 px-2 md:px-0 max-w-3xl mx-auto w-full overflow-x-hidden">
         <h1 className="text-4xl flex items-center justify-center gap-2 md:text-5xl font-extrabold mb-4 text-indigo-700 dark:text-indigo-300 tracking-tight  animate-fade-in">
           <Lightbulb className="text-yellow-500 animate-pulse h-10 w-10" /> AI
           Insights
@@ -54,9 +54,13 @@ export default function InsightsPage() {
             {refreshing ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
-        {loading && <Loader label="Loading Profile.." />}
+        {loading && <Loader label="Loading Insights.." />}
         {error && <div className="text-red-500 mb-4">{error}</div>}
-        {!loading && !error && <AIInsightsCard suggestions={suggestions} />}
+        {!loading && !error && (
+          <div className="break-words">
+            <AIInsightsCard suggestions={suggestions} />
+          </div>
+        )}
       </div>
     </main>
   );

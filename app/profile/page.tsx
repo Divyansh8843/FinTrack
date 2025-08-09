@@ -12,6 +12,7 @@ import {
   BarChart2,
   Edit3,
 } from "lucide-react";
+import Loader from "@/components/Loader";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import useSWR from "swr";
@@ -107,7 +108,11 @@ export default function ProfilePage() {
   }
 
   if (status === "loading" || loading || expenseSummaryLoading) {
-    return <main className="p-8 text-center">Loading...</main>;
+    return (
+      <main className="p-8 text-center">
+        <Loader label="Loading Profile.." />
+      </main>
+    );
   }
   if (!session) return null;
   if (expenseSummaryError) {
