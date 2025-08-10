@@ -23,6 +23,7 @@ export default function NotificationBell() {
     top: 64,
     right: 16,
   });
+  const [isMobile, setIsMobile] = useState(false);
 
   // Update panel position relative to bell button
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function NotificationBell() {
         top: rect.bottom + 8,
         right: Math.max(16, window.innerWidth - rect.right),
       });
+      setIsMobile(window.innerWidth < 640); // Tailwind sm breakpoint
     };
     updatePos();
     window.addEventListener("resize", updatePos);
@@ -89,6 +91,17 @@ export default function NotificationBell() {
     return () => clearInterval(interval);
   }, []);
 
+  // Prevent body scroll when mobile panel open
+  useEffect(() => {
+    if (isMobile && open) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isMobile, open]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   async function markAsRead(id: string) {
@@ -119,11 +132,13 @@ export default function NotificationBell() {
       {open &&
         createPortal(
           <div
-            className="w-80 bg-white dark:bg-zinc-900 shadow-2xl rounded-lg border pointer-events-auto overflow-hidden"
+            className={`bg-white dark:bg-zinc-900 shadow-2xl border pointer-events-auto overflow-hidden 
+              ${isMobile ? "w-[calc(100vw-1rem)] max-w-none rounded-t-2xl fixed left-2 right-2 bottom-2" : "w-80 rounded-lg"}
+            `}
             style={{
               position: "fixed",
-              top: panelPos.top,
-              right: panelPos.right,
+              top: isMobile ? undefined : panelPos.top,
+              right: isMobile ? undefined : panelPos.right,
               zIndex: 2147483647,
               overscrollBehavior: "contain",
             }}
@@ -132,14 +147,23 @@ export default function NotificationBell() {
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
           >
-            <div className="p-3 font-semibold border-b">Notifications</div>
+            <div className="p-3 font-semibold border-b flex items-center justify-between">
+              <span>Notifications</span>
+              <button
+                className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                onClick={() => setOpen(false)}
+                aria-label="Close notifications"
+              >
+                Close
+              </button>
+            </div>
             {loading ? (
               <div className="p-3 text-zinc-500">Loading...</div>
             ) : notifications.length === 0 ? (
               <div className="p-3 text-zinc-500">No notifications</div>
             ) : (
               <ul
-                className="max-h-40 md:max-h-48 overflow-y-scroll overscroll-y-contain custom-scrollbar scrollbar-stable pr-1"
+                className="max-h-[60vh] md:max-h-48 overflow-y-scroll overscroll-y-contain custom-scrollbar scrollbar-stable pr-1"
                 style={{ WebkitOverflowScrolling: "touch" }}
                 onWheel={(e) => e.stopPropagation()}
                 onTouchMove={(e) => e.stopPropagation()}
