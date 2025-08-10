@@ -3,10 +3,12 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import ToastProvider from "@/components/ToastProvider";
-import Loader from "@/components/Loader";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GoToTop from "@/components/GoToTop";
+
+// Stable list of public routes that don't require authentication
+const PUBLIC_ROUTES: readonly string[] = ["/", "/api/auth/signin", "/api/auth/signout"];
 
 // Protected route wrapper component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -14,12 +16,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // List of public routes that don't require authentication
-  const publicRoutes = ["/", "/api/auth/signin", "/api/auth/signout"];
-
   useEffect(() => {
     // If not loading and not authenticated, redirect to home page
-    if (status === "unauthenticated" && !publicRoutes.includes(pathname)) {
+    if (status === "unauthenticated" && !PUBLIC_ROUTES.includes(pathname)) {
       router.push("/");
     }
   }, [session, status, router, pathname]);
@@ -37,7 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   // If not authenticated and trying to access protected route, don't render anything
-  if (status === "unauthenticated" && !publicRoutes.includes(pathname)) {
+  if (status === "unauthenticated" && !PUBLIC_ROUTES.includes(pathname)) {
     return null;
   }
 

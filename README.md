@@ -2,6 +2,13 @@
 
 A smart, AI-powered expense management application built with Next.js, designed specifically for students to track, analyze, and optimize their spending.
 
+![Tech](https://img.shields.io/badge/Next.js-14-black?logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=black)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38b2ac?logo=tailwindcss&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)
+![Node](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)
+
 ## Features
 
 - 🎯 **Smart Expense Tracking** - Log and categorize expenses with ease
@@ -26,7 +33,7 @@ A smart, AI-powered expense management application built with Next.js, designed 
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20.x
 - MongoDB database
 - Google OAuth credentials
 - OpenAI API key (optional)
@@ -90,6 +97,53 @@ A smart, AI-powered expense management application built with Next.js, designed 
 - **Linting**: `npm run lint`
 - **Build**: `npm run build`
 
+## Quick Start
+
+1. Clone and install
+   - `git clone <your-repo-url>`
+   - `cd FunTrack && npm ci`
+2. Create `.env.local` with values (see sample below)
+3. Run the app: `npm run dev` → http://localhost:3000
+
+### .env.local sample
+```
+# Database
+MONGODB_URI=your_mongodb_connection_string
+
+# Authentication
+NEXTAUTH_SECRET=your_nextauth_secret_key
+NEXTAUTH_URL=http://localhost:3000
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# AI Services (Optional)
+OPENROUTER_API_KEY=your_openai_api_key
+OPENROUTER_MODEL=openai/gpt-4o-mini
+OPENROUTER_SITE_URL=http://localhost:3000
+OPENROUTER_APP_NAME=FinTrack Dev
+GEMINI_API_KEY=your_gemini_api_key
+
+# OCR (Optional)
+GOOGLE_CLOUD_VISION_API_KEY=your_vision_api_key
+
+# Email (Optional)
+SMTP_HOST=your_smtp_host
+SMTP_PORT=587
+SMTP_USER=your_smtp_username
+SMTP_PASS=your_smtp_password
+MAIL_FROM=noreply@yourdomain.com
+```
+
+## Scripts
+
+- **dev**: start Next.js in development mode
+- **build**: create an optimized production build
+- **start**: run the production server
+- **lint**: run ESLint with Next.js config
+- **type-check**: run TypeScript in noEmit mode
+
 ## Deployment on Vercel
 
 ### 1. **Connect to Vercel**
@@ -107,10 +161,41 @@ In your Vercel project settings, add all the environment variables from your `.e
 - Vercel will automatically build and deploy on every push to main branch
 - Or manually trigger deployments from the Vercel dashboard
 
+Notes:
+- Uses Node 20.x as defined in `package.json` `engines`
+- Build command: `npm run build`
+- Output directory: `.next`
+- Framework: Next.js (App Router)
+
 ### 4. **Custom Domain (Optional)**
 
 - Add your custom domain in Vercel project settings
 - Update `NEXTAUTH_URL` to match your domain
+
+## Troubleshooting
+
+- **Build fails due to MONGODB_URI**: Ensure `MONGODB_URI` is set in Vercel. The code validates at connection time, not at build.
+- **NextAuth callback errors**: Verify `NEXTAUTH_URL` matches the deployed domain and Google OAuth redirect URLs are configured accordingly.
+- **Images not loading**: Confirm your remote domains in `next.config.js` `images.domains`/`remotePatterns`.
+- **AI/OCR not working**: Check related API keys and quotas. Features are optional.
+
+## Security & Secrets
+
+- Do not commit `.env*` files. Use Vercel environment variables for Production/Preview.
+- Rotate credentials periodically. Scope API keys to least privilege.
+- Emails are sent via SMTP settings you provide; prefer provider-specific app passwords.
+
+## Performance & SEO
+
+- HTTP headers and compression configured in `next.config.js`.
+- Image optimization configured with `remotePatterns`, formats `webp/avif`.
+- Cache policy for static images set via headers in `vercel.json` and `next.config.js`.
+
+## FAQ
+
+- **Can I run without AI keys?** Yes, AI features are optional; core tracking works without them.
+- **Which Node version is required?** Node 20.x (as per `package.json` `engines`).
+- **Which database is supported?** MongoDB via Mongoose.
 
 ## Environment Variables Reference
 

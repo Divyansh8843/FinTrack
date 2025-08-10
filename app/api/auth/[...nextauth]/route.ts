@@ -1,9 +1,10 @@
 import NextAuth from "next-auth/next";
+import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import User from "@/models/User";
 import dbConnect from "@/lib/db";
 
-const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -13,7 +14,7 @@ const authOptions = {
   pages: {
     signIn: "/", // Redirect to home page instead of default signin page
   },
-  session: { strategy: "jwt" as const },
+  session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import dbConnect from "@/lib/db";
 import Notification from "@/models/Notification";
 import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session || !session.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (session.user && !("_id" in session.user)) {
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session || !session.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (session.user && !("_id" in session.user)) {
@@ -49,7 +50,7 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session || !session.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (session.user && !("_id" in session.user)) {
@@ -73,7 +74,7 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session || !session.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (session.user && !("_id" in session.user)) {

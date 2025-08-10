@@ -2,18 +2,7 @@
 
 import Link from "next/link";
 import ProductionImage from "@/components/ProductionImage";
-import {
-  FaFacebook,
-  FaTwitter,
-  FaYoutube,
-  FaInstagram,
-  FaTiktok,
-  FaApple,
-  FaAndroid,
-  FaLinkedin,
-  FaGithub,
-  FaVoicemail,
-} from "react-icons/fa";
+import { FaTwitter, FaInstagram, FaLinkedin, FaGithub } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -29,6 +18,29 @@ export default function Footer() {
               className="rounded-full"
             />
             <span className="font-bold text-2xl">FinTrack</span>
+          </div>
+          {/* Contact section under logo */}
+          <div className="mt-1 text-sm">
+            <div className="font-semibold mb-1">Contact</div>
+            <div className="flex flex-col gap-1">
+              <a
+                href="mailto:fintrackuser@gmail.com"
+                className="hover:underline"
+              >
+                fintrackuser@gmail.com
+              </a>
+              <a href="tel:+91881729XXXX" className="hover:underline">
+                +91 881729XXXX
+              </a>
+              <a
+                href="https://github.com/Divyansh8843/FinTrack/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                Report an issue
+              </a>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 flex-1">
@@ -50,7 +62,7 @@ export default function Footer() {
 
           <div className="flex flex-col gap-1">
             <span className="font-bold">Information</span>
-            <Link href="/" className="hover:underline">
+            <Link href="/help" className="hover:underline">
               Help
             </Link>
             <Link href="/" className="hover:underline">

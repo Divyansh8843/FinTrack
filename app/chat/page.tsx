@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { apiPost } from "@/lib/apiClient";
-import { SendHorizonal, ArrowUp } from "lucide-react";
+import { apiGet, apiPost } from "@/lib/apiClient";
+import { SendHorizonal } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProductionImage from "@/components/ProductionImage";
-import { scrollToTop } from "@/lib/scrollUtils";
 
 interface Message {
   sender: "user" | "bot";
@@ -18,9 +17,8 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [advanced, setAdvanced] = useState<boolean>(true);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  const [showPageScrollTop, setShowPageScrollTop] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
+  // Advanced mode and scroll-to-top states removed to satisfy ESLint (unused)
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -29,18 +27,7 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Handle scroll to show/hide scroll-to-top button
-  const handleScroll = () => {
-    if (chatContainerRef.current) {
-      const { scrollTop } = chatContainerRef.current;
-      setShowScrollTop(scrollTop > 200);
-    }
-  };
-
-  // Handle page scroll to show/hide page-level scroll-to-top button
-  const handlePageScroll = () => {
-    setShowPageScrollTop(window.pageYOffset > 300);
-  };
+  // Removed scroll state handlers
 
   // Prevent background scroll when focusing/scrolling inside chat container on touch devices
   useEffect(() => {
@@ -58,29 +45,30 @@ export default function ChatPage() {
       }
       e.stopPropagation();
     };
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    return () => el.removeEventListener("touchmove", onTouchMove as any);
+    el.addEventListener("touchmove", onTouchMove as EventListener, { passive: false });
+    return () => el.removeEventListener("touchmove", onTouchMove as EventListener);
   }, []);
 
-  // Scroll to top of chat
-  const handleScrollToTop = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+  // Removed scroll-to-top handler
 
   // Auto-scroll when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Add page scroll event listener
+  // Preflight: check AI availability
   useEffect(() => {
-    window.addEventListener("scroll", handlePageScroll);
-    return () => {
-      window.removeEventListener("scroll", handlePageScroll);
-    };
+    (async () => {
+      try {
+        const res = await apiGet<{ available: boolean }>("/api/ai-status");
+        setAiAvailable(res.available);
+      } catch {
+        setAiAvailable(false);
+      }
+    })();
   }, []);
+
+  // Removed page scroll event listener
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
@@ -91,11 +79,20 @@ export default function ChatPage() {
     try {
       const res = await apiPost<{ reply: string }>("/api/chat", {
         message: input,
-        mode: advanced ? "advanced" : "standard",
+        mode: "advanced",
       });
       setMessages((prev) => [...prev, { sender: "bot", text: res.reply }]);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e));
+      const msg = e instanceof Error ? e.message : String(e);
+      // If provider returned quota / rate limit, disable AI for this session
+      if (/\b429\b|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(msg)) {
+        setAiAvailable(false);
+        setError(
+          "AI is temporarily unavailable due to provider rate limits. Please try again later."
+        );
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
       setInput("");
@@ -119,10 +116,14 @@ export default function ChatPage() {
           Ask anything about student finance, budgeting, or saving. Get instant,
           AI-powered answers!
         </p>
-        <Card className="mb-6 bg-card border">
+        {aiAvailable === false && (
+          <div className="mb-6 p-4 border rounded bg-yellow-50 text-yellow-900 dark:bg-zinc-800 dark:text-yellow-200">
+            AI is currently unavailable. Please add an API key in environment variables to use the chatbot.
+          </div>
+        )}
+        <Card className="mb-6 bg-card border" aria-hidden={aiAvailable === false}>
           <CardContent
             ref={chatContainerRef}
-            onScroll={handleScroll}
             onWheel={(e) => e.stopPropagation()}
             className="h-[30vh] md:h-[40vh] overflow-y-auto overscroll-y-contain touch-pan-y custom-scrollbar flex flex-col gap-2 relative"
             style={{ WebkitOverflowScrolling: "touch" }}
@@ -149,13 +150,15 @@ export default function ChatPage() {
             {loading && (
               <div className="text-zinc-400">Finance Chatbot Typing...</div>
             )}
-            {error && <div className="text-red-500">{error}</div>}
+            {error && aiAvailable !== false && (
+              <div className="text-red-500">{error}</div>
+            )}
             {/* Anchor for autoscroll */}
             <div ref={messagesEndRef} />
           </CardContent>
         </Card>
         <form
-          className="flex gap-2 w-full sm:w-2/3 md:w-1/2 mx-auto"
+          className="flex gap-2 w-full sm:w-2/3 md:w-4/5 mx-auto"
           onSubmit={handleSend}
           onWheel={(e) => e.stopPropagation()}
         >
@@ -170,7 +173,7 @@ export default function ChatPage() {
           <Button
             type="submit"
             className="h-auto px-6 py-2 flex gap-2 items-center"
-            disabled={loading || !input.trim()}
+            disabled={loading || !input.trim() || aiAvailable === false}
           >
             <SendHorizonal /> Send
           </Button>

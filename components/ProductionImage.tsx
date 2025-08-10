@@ -32,22 +32,7 @@ export default function ProductionImage({
     }
   };
 
-  // If it's a static image from public folder, use regular img tag
-  if (src.startsWith("/") && !src.includes("http")) {
-    return (
-      <img
-        src={imgSrc}
-        alt={alt}
-        width={width}
-        height={height}
-        className={className}
-        onError={handleError}
-        loading={priority ? "eager" : "lazy"}
-      />
-    );
-  }
-
-  // For external images, use Next.js Image component
+  // Always use Next.js Image (local and external) to satisfy lint and optimize
   return (
     <Image
       src={imgSrc}

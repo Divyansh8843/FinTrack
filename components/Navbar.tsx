@@ -23,13 +23,26 @@ import {
 import Link from "next/link";
 import ProductionImage from "@/components/ProductionImage";
 
+// Type the PWA beforeinstallprompt event
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+  prompt(): Promise<void>;
+}
+
+declare global {
+  interface WindowEventMap {
+    beforeinstallprompt: BeforeInstallPromptEvent;
+  }
+}
+
 export default function Navbar() {
   const { data: session, status } = useSession();
   const [open, setOpen] = React.useState(false);
-  const [canInstall, setCanInstall] = React.useState<null | any>(null);
+  const [canInstall, setCanInstall] = React.useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    const handler = (e: any) => {
+    const handler = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
       setCanInstall(e);
     };
@@ -143,7 +156,7 @@ export default function Navbar() {
           <button
             onClick={async () => {
               canInstall.prompt();
-              const { outcome } = await canInstall.userChoice;
+              await canInstall.userChoice;
               setCanInstall(null);
             }}
             className="hidden md:inline-flex items-center gap-1 px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"

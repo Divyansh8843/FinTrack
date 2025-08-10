@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiPost } from "@/lib/apiClient";
+import { useEffect, useState, useCallback } from "react";
+import { apiGet, apiPost } from "@/lib/apiClient";
 import AIInsightsCard from "@/components/AIInsightsCard";
 import { RefreshCw, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,26 +11,47 @@ export default function InsightsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
   // Always advanced-quality outputs by default; toggle removed per request
 
-  const fetchInsights = async () => {
+  const fetchInsights = useCallback(async () => {
     setRefreshing(true);
     setError(null);
     try {
+      if (aiAvailable === false) return;
       const res = await apiPost<{ suggestions: string }>("/api/insights", {});
       setSuggestions(res.suggestions);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e));
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/\b429\b|RESOURCE_EXHAUSTED|quota|rate\s*limit/i.test(msg)) {
+        setAiAvailable(false);
+        setError(
+          "AI is temporarily unavailable due to provider rate limits. Please try again later."
+        );
+      } else {
+        setError(msg);
+      }
     } finally {
       setRefreshing(false);
       // Ensure the initial page load completes so UI renders the card
       setLoading(false);
     }
-  };
+  }, [aiAvailable]);
 
   useEffect(() => {
-    fetchInsights();
+    (async () => {
+      try {
+        const res = await apiGet<{ available: boolean }>("/api/ai-status");
+        setAiAvailable(res.available);
+      } catch {
+        setAiAvailable(false);
+      }
+    })();
   }, []);
+
+  useEffect(() => {
+    if (aiAvailable !== null) fetchInsights();
+  }, [aiAvailable, fetchInsights]);
 
   return (
     <main className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-blue-100 to-indigo-200 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 p-4">
@@ -46,7 +67,7 @@ export default function InsightsPage() {
         <div className="flex items-center justify-end mb-4">
           <Button
             onClick={fetchInsights}
-            disabled={refreshing || loading}
+            disabled={refreshing || loading || aiAvailable === false}
             variant="outline"
             className="gap-2"
           >
@@ -54,9 +75,16 @@ export default function InsightsPage() {
             {refreshing ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
+        {aiAvailable === false && (
+          <div className="mb-6 p-4 border rounded bg-yellow-50 text-yellow-900 dark:bg-zinc-800 dark:text-yellow-200">
+            AI is currently unavailable. Please add an API key in environment variables to view insights.
+          </div>
+        )}
         {loading && <Loader label="Loading Insights.." />}
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-        {!loading && !error && (
+        {error && aiAvailable !== false && (
+          <div className="text-red-500 mb-4">{error}</div>
+        )}
+        {!loading && !error && aiAvailable !== false && (
           <div className="break-words">
             <AIInsightsCard suggestions={suggestions} />
           </div>

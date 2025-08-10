@@ -10,7 +10,6 @@ import {
   Mail,
   GraduationCap,
   BarChart2,
-  Edit3,
 } from "lucide-react";
 import Loader from "@/components/Loader";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -44,7 +43,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [monthly, setMonthly] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [emailSettings, setEmailSettings] = useState({
     enabled: false,
     parentEmail: "",
@@ -71,9 +69,7 @@ export default function ProfilePage() {
       .then((data) => {
         setProfile({ ...data, image: session.user?.image || undefined });
         setMonthly(data.budget?.monthly || 0);
-        setError(null);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoading(false));
 
     fetch("/api/notifications/settings", { credentials: "include" })

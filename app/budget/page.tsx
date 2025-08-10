@@ -196,7 +196,7 @@ export default function BudgetPage() {
           <Wallet className="text-green-600" /> Smart Budget Planning
         </h1>
         <p className="text-muted-foreground mb-8 text-lg text-center">
-          Set your monthly budget and category limits. We'll help you plan for
+          Set your monthly budget and category limits. We&apos;ll help you plan for
           both expenses and savings goals!
         </p>
 

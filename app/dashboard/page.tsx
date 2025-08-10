@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
-import { apiGet, apiPost } from "@/lib/apiClient";
+import { apiGet } from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
 import ExpensePieChart, { ExpenseBarChart } from "@/components/ExpensePieChart";
 import {
-  TrendingUp,
   TrendingDown,
   Wallet,
   Goal,
@@ -50,7 +49,6 @@ export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [budget, setBudget] = useState<Budget | null>(null);
-  const [insights, setInsights] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -73,23 +71,27 @@ export default function DashboardPage() {
         setGoals(goals);
         setBudget(budget);
         setError(null);
-        // Fetch insights in background; do not fail page if AI is unavailable
-        apiPost<{ suggestions: string }>("/api/insights", {})
-          .then((insightsRes) => setInsights(insightsRes.suggestions))
-          .catch(() => {
-            // ignore AI errors on dashboard
-          });
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)))
       .finally(() => setLoading(false));
 
-    // Poll goals periodically to keep progress real-time
-    const interval = setInterval(() => {
+    // Poll goals and expenses periodically to keep dashboard real-time
+    const goalsInterval = setInterval(() => {
       apiGet<Goal[]>("/api/goals")
         .then(setGoals)
         .catch(() => {});
     }, 15000);
-    return () => clearInterval(interval);
+
+    const expensesInterval = setInterval(() => {
+      apiGet<Expense[]>("/api/expenses")
+        .then(setExpenses)
+        .catch(() => {});
+    }, 15000);
+
+    return () => {
+      clearInterval(goalsInterval);
+      clearInterval(expensesInterval);
+    };
   }, [session, status, router]);
 
   // Prepare pie chart data
@@ -122,8 +124,6 @@ export default function DashboardPage() {
 
   // Calculate totals and progress
   const totalSpent = pieData.reduce((a, b) => a + b.value, 0);
-  const topCategory =
-    pieData.sort((a, b) => b.value - a.value)[0]?.category || "-";
 
   // Smart budget calculations with goals integration
   const monthlyBudget = budget?.monthly || 0;
@@ -137,7 +137,6 @@ export default function DashboardPage() {
     0
   );
   const totalGoalSaved = goals.reduce((sum, goal) => sum + goal.savedAmount, 0);
-  const totalGoalRemaining = totalGoalTarget - totalGoalSaved;
 
   // Calculate monthly savings needed for goals
   const activeGoals = goals.filter((goal) => {
@@ -368,7 +367,7 @@ export default function DashboardPage() {
                 <div className="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-yellow-600" />
                   <span className="text-yellow-700 dark:text-yellow-300 text-sm">
-                    You're approaching your expense limit. Consider reducing
+                    You&apos;re approaching your expense limit. Consider reducing
                     spending this month.
                   </span>
                 </div>

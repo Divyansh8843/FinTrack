@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import dbConnect from "@/lib/db";
 import User from "@/models/User";
 import Notification from "@/models/Notification";
 
-export async function GET(req: NextRequest) {
-  const session = await getServerSession();
+export async function GET() {
+  const session = await getServerSession(authOptions);
   if (!session || !session.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await dbConnect();
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   if (!session || !session.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (session.user && !("_id" in session.user)) {

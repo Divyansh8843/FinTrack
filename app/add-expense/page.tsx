@@ -4,8 +4,6 @@ import { useState } from "react";
 import { apiPost } from "@/lib/apiClient";
 import { toast } from "react-toastify";
 import {
-  Camera,
-  Wallet,
   Utensils,
   Bus,
   Book,
@@ -13,7 +11,7 @@ import {
   MoreHorizontal,
   UploadCloud,
 } from "lucide-react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const categories = [
@@ -59,14 +57,7 @@ export default function AddExpensePage() {
   const [image, setImage] = useState<File | null>(null);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [ocrText, setOcrText] = useState("");
-  const [ocrDebug, setOcrDebug] = useState<{
-    amount?: number;
-    vendor?: string;
-    date?: string;
-    category?: string;
-    source?: string;
-  } | null>(null);
+  // Removed unused OCR debug/text state to satisfy ESLint
 
   async function handleOcr() {
     if (!image) return;
@@ -113,7 +104,6 @@ export default function AddExpensePage() {
           setCategory(found ? found.label : "Misc");
         }
         if (ocrRes.source) setSource(ocrRes.source);
-        setOcrText(ocrRes.text || "");
         toast.success("OCR data extracted!");
       } else {
         toast.error("OCR failed. Unexpected response.");

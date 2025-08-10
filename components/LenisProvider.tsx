@@ -3,6 +3,12 @@
 import { useEffect, useRef, createContext, useContext } from "react";
 import Lenis from "lenis";
 
+declare global {
+  interface Window {
+    __LENIS__?: Lenis;
+  }
+}
+
 interface LenisProviderProps {
   children: React.ReactNode;
 }
@@ -22,7 +28,7 @@ export default function LenisProvider({ children }: LenisProviderProps) {
 
     // Expose Lenis instance globally for utility functions
     if (typeof window !== "undefined") {
-      (window as any).__LENIS__ = lenisRef.current;
+      window.__LENIS__ = lenisRef.current || undefined;
     }
 
     // RAF loop for Lenis
@@ -39,7 +45,7 @@ export default function LenisProvider({ children }: LenisProviderProps) {
       }
       // Remove global reference
       if (typeof window !== "undefined") {
-        delete (window as any).__LENIS__;
+        delete window.__LENIS__;
       }
     };
   }, []);
